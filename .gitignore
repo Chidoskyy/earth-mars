@@ -1,0 +1,8 @@
+.env
+
+node_modules
+bin
+obj
+target
+
+.DS_Store
