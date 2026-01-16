@@ -108,7 +108,7 @@ public String home() {
 
     <body>
       <div class="container">
-        <h1>Where would you rather live?</h1>
+        <h1>Earth vs Mars — Swarm Update</h1>
 
         <div class="cards">
           <form method="post" action="/vote">

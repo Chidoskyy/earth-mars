@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: earthmars
+      POSTGRES_PASSWORD: earthmars_password
+      POSTGRES_DB: earthmarsdb
+    volumes:
+      - earthmars_pgdata:/var/lib/postgresql/data
+    networks:
+      - earthmars-net
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - earthmars-net
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  vote:
+    image: earthmars-vote:1.0
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_LIST: votes
+    networks:
+      - earthmars-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    image: earthmars-worker:1.0
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_LIST: votes
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: earthmars
+      DB_PASSWORD: earthmars_password
+      DB_NAME: earthmarsdb
+    networks:
+      - earthmars-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  result:
+    image: earthmars-result:1.0
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: earthmars
+      DB_PASSWORD: earthmars_password
+      DB_NAME: earthmarsdb
+    networks:
+      - earthmars-net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+networks:
+  earthmars-net:
+    driver: overlay
+
+volumes:
+  earthmars_pgdata:
